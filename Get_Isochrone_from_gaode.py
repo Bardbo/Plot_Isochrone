@@ -2,7 +2,7 @@
 # @Author: Bardbo
 # @Date:   2020-10-24 21:29:09
 # @Last Modified by:   Bardbo
-# @Last Modified time: 2020-10-24 21:29:12
+# @Last Modified time: 2022-04-03 10:19:38
 
 import requests
 import json
@@ -49,7 +49,7 @@ class GetTripTime:
         """[未使用批量请求接口，未使用多线程，建议更换自己的高德开放平台webAPI key]
         
         Args:
-            method ([str]): [出行方式，不同出行方式的请求网址不同，walking、driving、transit]
+            method ([str]): [出行方式，不同出行方式的请求网址不同，walking、driving、transit、bicycling]
             center_coor ([list or tuple]): [等时圈中心点的经纬度坐标, GCJ02 高德坐标系]
             r (float, optional): [矩形范围的半径，单位为度数]. Defaults to 0.18.
             m (int, optional): [矩形范围划分成m行]. Defaults to 20.
@@ -71,8 +71,10 @@ class GetTripTime:
             self.get_time = self.get_transit_time
         elif self.method == 'driving':
             self.get_time = self.get_driving_time
+        elif self.method == 'bicycling':
+            self.get_time = self.get_bicycling_time
         else:
-            raise '不支持该种出行方式！请从walking、driving、transit中选择'
+            raise '不支持该种出行方式！请从walking、driving、transit、bicycling中选择'
 
     def get_coor_ls(self):
         left = (self.center_coor[0] - self.r, self.center_coor[1] - self.r)
@@ -125,6 +127,17 @@ class GetTripTime:
             r = requests.get(url)
             rt = json.loads(r.text)
             time = rt['route']['paths'][0]['duration']
+            print(time)
+        except:
+            time = 0
+        return time
+
+    def get_bicycling_time(self, origin, destination):
+        url = f'https://restapi.amap.com/v4/direction/bicycling?origin={origin}&destination={destination}&key={self.key}'
+        try:
+            r = requests.get(url)
+            rt = json.loads(r.text)
+            time = rt['data']['paths'][0]['duration']
             print(time)
         except:
             time = 0
